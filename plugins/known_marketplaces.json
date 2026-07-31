@@ -22,5 +22,13 @@
     },
     "installLocation": "/Users/aurora/.claude/plugins/marketplaces/last30days-skill",
     "lastUpdated": "2026-07-03T15:18:14.469Z"
+  },
+  "caveman": {
+    "source": {
+      "source": "github",
+      "repo": "JuliusBrussee/caveman"
+    },
+    "installLocation": "/Users/aurora/.claude/plugins/marketplaces/caveman",
+    "lastUpdated": "2026-07-20T06:53:57.044Z"
   }
 }

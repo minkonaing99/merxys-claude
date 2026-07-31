@@ -95,7 +95,8 @@
   },
   "enabledPlugins": {
     "ponytail@ponytail": true,
-    "apple-skills@apple-skills": false
+    "apple-skills@apple-skills": false,
+    "caveman@caveman": true
   },
   "extraKnownMarketplaces": {
     "ponytail": {
@@ -109,10 +110,17 @@
         "source": "directory",
         "path": "/Users/aurora/.claude/plugins/marketplaces/apple-skills"
       }
+    },
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
     }
   },
   "spinnerTipsEnabled": false,
   "awaySummaryEnabled": false,
-  "tui": "default",
+  "tui": "fullscreen",
+  "autoMemoryEnabled": false,
   "terminalProgressBarEnabled": true
 }

@@ -4,6 +4,10 @@
 
 input=$(cat)
 
+# --- Persist metrics for external readers (e.g. NoctAgent) ---
+printf '%s' "$input" > "$HOME/.claude/statusline-metrics.json.tmp" 2>/dev/null \
+  && mv -f "$HOME/.claude/statusline-metrics.json.tmp" "$HOME/.claude/statusline-metrics.json" 2>/dev/null
+
 # --- Extract fields ---
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
 model=$(echo "$input" | jq -r '.model.display_name // empty')
