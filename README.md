@@ -46,12 +46,8 @@ cd ~/.claude/hooks && npm install
 │       ├── ponytail/       # Ponytail plugin (DietrichGebert/ponytail)
 │       └── apple-skills/   # Apple/iOS skills (local, disabled by default)
 ├── rules/                  # Coding standards loaded per language
-│   ├── common/             # Universal rules (always loaded)
 │   ├── typescript/
-│   ├── python/
-│   ├── swift/
-│   ├── java/
-│   └── php/
+│   └── python/
 └── skills/                 # Skill definitions (user-invocable tools)
 ```
 
@@ -211,22 +207,9 @@ Skills are richer tools beyond commands. Located in `skills/`. Plugin skills com
 
 Rules in `rules/` loaded by Claude on demand. `CLAUDE.md` specifies when to load each set.
 
-### Common Rules (always active via `@rules/common/`)
-
-| File | What it enforces |
-|------|-----------------|
-| `development-workflow.md` | Research -> Plan -> TDD -> Review -> Commit order, commit format, PR process |
-| `coding-style.md` | No mutation, high cohesion/low coupling, <50 line functions |
-| `testing.md` | TDD mandatory, 80%+ coverage, unit + integration + E2E |
-| `security.md` | Pre-commit checklist: no secrets, parameterized queries, XSS prevention, rate limiting |
-| `performance.md` | Model selection (Haiku/Sonnet/Opus), context window management |
-| `patterns.md` | Repository pattern, API response envelope, skeleton project approach |
-| `agents.md` | Parallel agent execution, multi-perspective analysis roles |
-| `hooks.md` | Hook types, TodoWrite best practices, auto-accept guidance |
-
 ### Language Rules (loaded per language)
 
-Each language folder (`typescript/`, `python/`, `swift/`, `java/`, `php/`) contains `coding-style.md`, `patterns.md`, `testing.md`, `security.md`.
+Each language folder (`typescript/`, `python/`) contains `coding-style.md`, `patterns.md`, `testing.md`, `security.md`.
 
 ---
 

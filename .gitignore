@@ -3,6 +3,11 @@ history.jsonl
 .ponytail-active
 .last-cleanup
 .agents
+statusline-metrics.json
+.caveman-active
+.caveman-active.prev
+.caveman-mode-log.jsonl
+.playwright/
 
 # Python bytecode
 __pycache__/

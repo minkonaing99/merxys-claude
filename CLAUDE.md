@@ -4,7 +4,7 @@
 
 - Never mutate. Return new copies.
 - 200-400 lines/file. <50 lines/fn.
-- Research (GitHub, registries, docs) before writing anything new.
+- Research (GitHub, registries, docs) before write anything new.
 - No hardcoded secrets. Validate all input.
 - 80%+ test coverage.
 
@@ -15,19 +15,19 @@
    - no new deps
    - no auth/crypto/payment/input-parsing path
    - no public API or schema change
-   Touches a security path? NEVER trivial.
-1. Unclear task? Stop. Ask. State assumptions before coding.
+   Touches security path? NEVER trivial.
+1. Unclear task? Stop. Ask. State assumptions before code.
 2. New feature, new file, or 3+ file change? Planner agent first.
-3. Multiple interpretations? Present them. Don't pick silently.
+3. Multiple interpretations? Present them. No silent pick.
 4. After non-trivial code: run code-reviewer. Fix CRITICAL + HIGH.
 5. Before commit: run security-reviewer (always; fast secrets/input scan on trivial).
 
 ## Change Discipline
 
 - Touch only what request requires.
-- Match existing style. Don't improve adjacent code.
+- Match existing style. No improve adjacent code.
 - Remove only orphans YOUR changes created.
-- Simpler solution exists? Say so before implementing.
+- Simpler solution exists? Say so before implement.
 
 ## TDD
 
@@ -38,32 +38,17 @@ Exempt: trivial tier (gate 0) + pure docs/config/rename.
 
 - TS/JS: `rules/typescript/{coding-style,patterns,testing,security}.md`
 - Python: `rules/python/{coding-style,patterns,testing,security}.md`
-- Swift: `rules/swift/{coding-style,patterns,testing,security}.md`
-- Java: `rules/java/{coding-style,patterns,testing,security}.md`
-- PHP: `rules/php/{coding-style,patterns,testing,security}.md`
-
-## Common Rules (load only on demand)
-
-Read the relevant file when the task calls for it; do not auto-load:
-- Workflow/commits/PRs: `rules/common/development-workflow.md`
-- Coding style/immutability: `rules/common/coding-style.md`
-- Testing/TDD/coverage: `rules/common/testing.md`
-- Model choice/context/perf: `rules/common/performance.md`
-- Design patterns: `rules/common/patterns.md`
-- Hooks/permissions/todos: `rules/common/hooks.md`
-- Agent orchestration: `rules/common/agents.md`
-- Security checklist: `rules/common/security.md`
 
 ## Project Init
 
-- On new project: create `.gitignore`, add `CLAUDE.md` to it.
+- New project: create `.gitignore`, add `CLAUDE.md` to it.
 - Create `docs/` folder. All docs go there (api.md, database.md, release_notes.md, architecture.md, etc.). README.md stays at root only.
 
 ## Docs Rule
 
-- Need to read docs? Check `docs/` first, not source code.
-- Creating new doc? Always write to `docs/`. Never scatter docs at root.
-- `docs/` is single source of truth for all project documentation.
+- Need read docs? Check `docs/` first, not source code.
+- Create new doc? Always write to `docs/`. Never scatter docs at root.
+- `docs/` is single source of truth for all project docs.
 
 ## Project Defaults
 
@@ -82,7 +67,7 @@ Read the relevant file when the task calls for it; do not auto-load:
 - Simplest working solution. No over-engineering.
 - No abstractions for single-use ops.
 - No speculative features.
-- Read file before modifying. Never edit blind.
+- Read file before modify. Never edit blind.
 - No docstrings/type annotations on unchanged code.
 - No error handling for impossible scenarios.
 - Three similar lines > premature abstraction.
@@ -95,9 +80,9 @@ Read the relevant file when the task calls for it; do not auto-load:
 
 ## Debugging Rules
 
-- Never speculate without reading relevant code first.
+- Never speculate without read relevant code first.
 - State what found, where, fix. One pass.
-- Cause unclear? Say so. Don't guess.
+- Cause unclear? Say so. No guess.
 
 ## Formatting
 
