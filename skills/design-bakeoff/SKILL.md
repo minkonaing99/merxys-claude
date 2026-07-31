@@ -76,7 +76,8 @@ The engines above are a *menu*, not a checklist. Firing all 20 on every job wast
 
 ## Owned artifacts (this dir)
 
-- `taste-profile.md` — concrete moves from YOUR past picks (fonts, palette, layout, motion, density). The primary learned artifact. Read it in Stage 0.
+- `taste-signals.jsonl` — append-only machine-readable pick record (one row/run: gallery chips, note, winner tokens, runner-up reject, loser token-diffs, dials). Raw fuel for the learning loop; schema in `data/taste-signals.schema.md`. Written in Stage 5, read for auto-dial in Stage 0.
+- `taste-profile.md` — the DERIVED prose narrative distilled from `taste-signals.jsonl` (fonts, palette, layout, motion, density). Rewritten by the distill step only. Read it in Stage 0.
 - `references.md` — swipe file: real-pixel tokens extracted from sites you rate. Persists across jobs.
 - `scoreboard.md` — secondary metric: generator win tally. Used only to retire a dead engine.
 - `data/` — static lookup tables (`colors.csv` 160 palettes by product type, `typography.csv` 73 font pairs w/ ready imports, `charts.csv` 25 data-type→chart picks). Curated priors, not verdicts. See `data/README.md`. Grep to seed a variant when no real reference grounds the job; real pixels always override.
@@ -93,18 +94,23 @@ The engines above are a *menu*, not a checklist. Firing all 20 on every job wast
    - **No real reference given?** Grounding precedence: real pixels > awesome-design-md brand tokens > `data/` lookup tables > raw LLM priors.
      - **awesome-design-md brand match:** if the brief names or references a known brand aesthetic (stripe, linear, notion, apple, vercel, cursor, raycast, figma, spotify, etc.), check `~/.claude/reference/awesome-design-md/design-md/<brand>/DESIGN.md` — 74 brands available. If a match exists, copy its `DESIGN.md` to the project root and use it as the primary token reference. This gives real measured tokens (colors, type, spacing, radius, motion) from that brand's actual design system — far more accurate than memory.
      - **data/ fallback:** if no brand match, grep `data/colors.csv` for the matched product type and `data/typography.csv` for the read's mood to get a curated starting palette + font pair — beats inventing AI-purple/Inter. These SEED, they don't decide; divergence + judges still run. Dashboards: also grep `data/charts.csv` per data shape.
-4. Set dials `VARIANCE / MOTION / DENSITY`. Ask at most ONE clarifying question, only if the read genuinely diverges.
+4. Set dials `VARIANCE / MOTION / DENSITY`.
+   - **Auto-dial (gated):** if `taste-signals.jsonl` holds **≥5 rows for this register (brand/product)** OR a distill has already run, pre-set the starting dials from the learned per-register axis leanings (color-temp/ornament/type → V, motion-amount → M, density → D). State the auto-set values in the Design Read; the user overrides with words. **Below the gate, stay passive** — use `data/` + priors, no auto-dial (thin data overfits).
+   - All 5 lanes still generate regardless; auto-dial only moves the *starting point*, never prunes divergence. Explore-1-in-4 still fires.
+   Ask at most ONE clarifying question, only if the read genuinely diverges.
 
 ### Stage 1 — Effort tier (governor, Q6)
 Auto-detect job size from the Design Read; this gates everything downstream:
 - **Tweak** (one component / color / copy) → no bake-off. Single pass, judges only. Seconds.
 - **Page** (one full page / section) → round-robin OR 2-variant bake-off. Ask which.
-- **Site** (multi-page / new brand / redesign) → full 3-variant bake-off + grounding + winner port.
+- **Site** (multi-page / new brand / redesign) → full 5-variant bake-off + grounding + winner port.
 
 **Scope default — build the WHOLE page, not just the hero.** "landing" / "page" / "site" means every standard section for that page kind, e.g. landing = hero + value-prop / how-it-works + features + social-proof + pricing/plans + CTA + footer. Only build a fragment when the user explicitly scopes one ("hero", "pricing section", "this button"). If the user said a fragment, build that fragment; otherwise default to the full page. State the section list in the Design Read so scope is confirmed before generating.
 
 ### Stage 2 — Generators with divergence contracts (Q4)
-**Scope guard:** non-landing surface → drop A (taste-skill refuses it). No Google Stitch → drop C. If only B is eligible (e.g. dashboard), B generates both variants with distinct direction lanes — treat it as two invocations with separate divergence contracts, not one.
+**Scope guard:** non-landing surface → drop A (taste-skill refuses it). No Google Stitch → drop C. If only B is eligible (e.g. dashboard), B generates all five variants with distinct direction lanes — treat each as a separate invocation with its own divergence contract, not one.
+
+**Variant count by tier:** Site → **5 variants** (five distinct lanes below). Page → 2 variants (pick two lanes farthest apart). Tweak → no bake-off. When fewer generators are eligible than variants needed, the eligible generators cover the extra lanes (e.g. B alone builds all 5, one per lane).
 
 **Visual mockup first (optional but high-value):** before writing HTML, run `imagegen-frontend-web` to generate one reference image per section. Feed these images to the generators as compositional anchors — they'll produce code that matches an art-directed layout rather than inventing one. Skip if imagegen tools unavailable or brief is a minor tweak. For mobile-first briefs, also run `imagegen-frontend-mobile` for app screen concepts.
 
@@ -124,13 +130,19 @@ Every bake-off variant is **static single-file** (`index.html`, CDN deps, no bui
 
 **Exception — motion-first briefs:** when motion IS the message (kinetic-type / Awwwards / "make it move" / any lane with MOTION dial ≥ 7), ship a **motion signature inside each variant** so motion is judged as a divergence axis, not chosen blind. Use CDN GSAP, wrapped in `gsap.matchMedia()` honoring `prefers-reduced-motion`. Default off; turn on only when the brief makes motion the point (state which mode in the Design Read).
 
-Each variant gets a **divergence contract** so they CAN'T converge — assign per variant:
-- a **direction lane** (e.g. editorial/type-driven · Swiss-grid/restrained · kinetic/Awwwards-maximal),
-- a distinct **dial set** (calm V5/M3/D2 · bold V8/M6/D4 · experimental V9/M9/D4),
-- one **banned crutch** it must avoid (no centered hero · no card grid · no gradient),
-- (motion-first briefs only) a distinct **motion signature** matched to its dial M.
+Each variant gets a **divergence contract** so they CAN'T converge — assign per variant a **direction lane**, a distinct **dial set**, one **banned crutch** it must avoid, and (motion-first briefs only) a distinct **motion signature** matched to its dial M. The five Site lanes:
 
-The Design Read gates lanes to plausible-for-this-audience only (public-sector never gets the maximal lane). Spawn eligible generators as **parallel subagents**, each carrying its contract + the `references.md` tokens (+ the `data/` palette/font seed when no real reference grounded Stage 0). The seed is a baseline, not a uniform: the restrained lane can take it near-verbatim, but high-VARIANCE and explore lanes must push off it (shifted hue, alt font pair) — a shared palette across all variants kills color divergence.
+| # | Direction lane | Dial set (V/M/D) | Banned crutch | Lane guide |
+|---|---|---|---|---|
+| 1 | editorial / type-driven | V5 / M3 / D2 | no card grid | `minimalist-ui` |
+| 2 | Swiss-grid / restrained | V7 / M4 / D4 | no centered hero | — |
+| 3 | minimalist / quiet | V3 / M2 / D2 | no gradient | `minimalist-ui` |
+| 4 | kinetic / Awwwards-maximal | V9 / M8 / D4 | no default glassmorphism | `high-end-visual-design` |
+| 5 | brutalist / tactical | V8 / M5 / D5 | no soft shadows | `industrial-brutalist-ui` |
+
+Page tier picks the two lanes farthest apart on the read (usually 1 + 4, or 3 + 5). Each lane must diverge on layout/type/color — a shared palette across all five kills color divergence, so high-V lanes (4, 5) push off the seed hue.
+
+The Design Read gates lanes to plausible-for-this-audience only (public-sector never gets lane 4/5; a design studio can take all five). Spawn eligible generators as **parallel subagents**, each carrying its contract + the `references.md` tokens (+ the `data/` palette/font seed when no real reference grounded Stage 0). The seed is a baseline, not a uniform: the restrained lane can take it near-verbatim, but high-VARIANCE and explore lanes must push off it (shifted hue, alt font pair) — a shared palette across all variants kills color divergence.
 
 **Generator timeout resilience:** if a subagent times out or errors mid-run, do not re-spawn — generate the missing variant inline instead. Document what completed vs. what was generated inline in `run-summary.md`. The eval still runs; a partial with fewer variants is better than blocking indefinitely.
 
@@ -141,7 +153,16 @@ LLM judges NARROW, they never DECIDE. Taste is the user's.
 1. **Objective gates first, fail-fast** (Q6): render each static variant, run axe / contrast-ratio / Lighthouse a11y+perf. A variant that fails a gate is OUT — never reaches pixel/judge stage. Don't pay to judge broken work.
 2. **Responsive gate (#1) — judge mobile AND desktop.** Screenshot each survivor at BOTH **mobile (375px)** and **desktop (1440px)**. Mobile is most traffic; a desktop-only win that breaks on mobile (overflow, unreadable type, broken nav, tap targets <44px) **fails the gate** — same as a11y. This is correctness, not taste. Both viewports go to the judges and to you.
 3. **Real pixels** (Q1b): the mobile + desktop screenshots per survivor. For motion-first briefs (variants already animated), also capture motion — short GIF/clip (claude-in-chrome `gif_creator`) or live browser to scrub. `emil-design-eng` reads the IMAGES (feel/motion Before-After table), `impeccable audit` fixes the code. Score on: hierarchy, responsive integrity, motion feel, anti-slop (no AI-purple gradient on hero/background/CTAs — purple in code syntax highlighting is domain-correct for dev tools and is NOT a tell; no Inter as primary display font; no centered-hero over dark mesh; no default glassmorphism), brief fit, reference fidelity.
-4. **Your eye decides** (Q1c): present 2-3 survivors side by side, each with mobile + desktop shots (+ clips for motion-first). The USER picks the winner. I only narrowed.
+4. **Your eye decides** (Q1c) — **show survivors in a browser gallery, not just screenshots.** Build `gallery.html` at the project root that embeds every surviving variant and open it in claude-in-chrome so the user compares live:
+   - One `<iframe src="variant-N/index.html">` per survivor in a responsive grid; each framed with its lane label + dial set + judge one-liner.
+   - A **viewport toggle** (mobile 375px / desktop 1440px) that resizes the iframes so both breakpoints are viewable without leaving the page.
+   - An **"open full"** link per variant (loads that variant alone in a new tab) and a **numbered pick control** (1-5) so the user states the winner by number.
+   - Motion-first briefs: iframes render live motion; no clip needed. Keep the gallery static-single-file (no build).
+   Serve the folder (e.g. `python3 -m http.server`) and open `gallery.html`. The USER picks the winner by number. I only narrowed — never auto-pick on taste.
+   - **Capture WHY at pick-time (learning-loop fuel).** The pick control carries **6 fixed dial-aligned chips**, each a +/- toggle — the ONLY vocabulary (freeform tags rot the profile):
+     `color-temp` (warmer/cooler) · `density` (denser/airier) · `type-character` (more-expressive/more-neutral) · `motion-amount` (more/less) · `layout-shape` (more-asymmetric/more-grid) · `ornament-level` (more/less). Winner gets the chips clicked (skip any that don't apply) + an **optional free-text note** for the rare reason no axis covers.
+     One **reject chip on the runner-up only** (the "almost" variant): too-cold / too-cramped / generic / motion-overdone. The other 3 losers are logged by token-diff automatically in Stage 5 — no user input.
+     These map 1:1 to the `VARIANCE / MOTION / DENSITY` dials so the signal reconciles with them directly. The pick + chips + note + runner-up reject are written in Stage 5.
 
 ### Stage 4 — Motion (winner only, default path)
 Add motion to the chosen winner: `gsap-core`, then `gsap-timeline` / `gsap-scrolltrigger` / `gsap-react` / `gsap-frameworks` per host. Match the winner's MOTION dial — entrance reveals, scroll parallax/pin, hover micro-interactions, count-ups; restraint for low dials, don't add motion the lane didn't call for. Always `gsap.matchMedia()` + `prefers-reduced-motion`. Run `gsap-performance` (transforms only, no layout thrash, 60fps). Then show the user the animated winner to confirm before port. (Motion-first briefs already animated in Stage 2 — here just polish + perf-pass.)
@@ -165,11 +186,13 @@ Skip this stage entirely for static/low-motion briefs.
 2. **Quality pass (loophole #3):** the port is NOT trusted until it passes the relevant best-practices skill — `next-best-practices` (RSC boundaries, hydration, async APIs, no data waterfalls) and `react-best-practices` (bundle size, re-renders, code-split). Fix what they flag.
 3. **SEO pass:** `nextjs-seo` — metadata/`generateMetadata`, OG + twitter images, sitemap.xml, robots.txt, canonical, JSON-LD, favicons/manifest, Core Web Vitals. If the site has forms/backend, `api-design-patterns` for the endpoints.
 4. **Export design tokens (#5, #7):** emit the winner's colors / type scale / spacing / radius / motion as `DESIGN.md` + CSS custom properties (or `tailwind.config`). **Write `DESIGN.md` to the project root** so `impeccable` reads it next run = future work auto-on-brand (closes the loop). Use `impeccable`'s token output; don't hand-roll.
-5. **Taste profile** (Q3, primary): extract WHY the user picked it — concrete tokens (font, palette, layout pattern, motion style, density) — append to `taste-profile.md`. This is the compounding artifact; future Design Reads start from it.
-6. **Capture rejections (#4):** also log each LOSING variant and one line on *why it lost* (too cold / cramped / generic / motion overdone) to `taste-profile.md`'s rejection list. Losers carry as much signal as winners — anti-preferences converge taste 2-3× faster.
+5. **Append the structured signal (Q3, primary):** write ONE row to `taste-signals.jsonl` per run — the machine-readable raw record that fuels the loop. Schema (see `data/taste-signals.schema.md`):
+   `{ date, page_kind, register (brand|product), winner_variant, chips {color_temp, density, type_character, motion_amount, layout_shape, ornament_level} (each -1|0|+1), note, winner_tokens {font, palette, layout, motion, density}, runner_up_reject (too-cold|too-cramped|generic|motion-overdone|null), loser_token_diffs [], dials {V, M, D}, generator }`.
+   Chips come from the gallery pick control; the 3 non-runner-up losers get `loser_token_diffs` computed here (winner tokens minus each loser: font/palette/density/lane deltas). This is append-only and NEVER hand-summarized — the prose profile is derived from it.
+6. **Prose profile stays human-readable:** `taste-profile.md` is the *derived* narrative, rewritten only by the distill step (9), not appended per-run. Between distills it's stable. (Old per-run appends to the table/rejection list are replaced by the signals log.)
 7. **Swipe file**: promote any reference that drove the winner into `references.md` for reuse.
 8. **Generator tally** (secondary): log winner's generator to `scoreboard.md`. Used only to retire an engine that never wins.
-9. **Distill (#6) — every ~10 entries:** collapse `taste-profile.md` into stable preferences (always true) vs context-dependent ones (true for landing, not dashboard), resolving contradictions. Append-only profiles rot into noise; distillation keeps signal sharp. Trigger when the table passes ~10 rows.
+9. **Distill (#6) — every ~10 signal rows:** read `taste-signals.jsonl`, collapse into `taste-profile.md`'s stable preferences (always true) vs context-dependent ones (true for landing, not dashboard, gated by register/domain), resolving contradictions. The chips aggregate into per-register axis leanings (e.g. brand-landing → color-temp +0.7, density -0.3). Append-only raw + derived summary keeps signal sharp without rot. Trigger when the log passes ~10 rows since last distill.
 
 ### Stage 6 — Ship (optional, on user approval)
 Only when the user asks to go live. Confirm before deploying (outward-facing, hard to reverse).
@@ -179,6 +202,9 @@ Only when the user asks to go live. Confirm before deploying (outward-facing, ha
 
 ## Laws
 - Judges narrow; the user decides. Never auto-pick a winner on taste.
+- Site tier ships 5 divergent variants (one per lane); surface them in a live browser gallery, not screenshots alone. The user picks by number.
+- The gallery captures WHY at pick-time: 6 fixed dial-aligned chips + optional note on the winner, one reject chip on the runner-up. Fixed vocabulary only — freeform tags rot the profile.
+- Learned signal lives raw in `taste-signals.jsonl`; `taste-profile.md` is derived by distill, never hand-appended. Auto-dial gated behind ≥5 rows/register or first distill; it moves the starting dials only, never prunes the 5 lanes.
 - Engines are never edited — all intelligence lives in this file + the owned artifacts.
 - A generated UI is unfinished until gates pass (a11y + responsive) AND both judges run.
 - Copy + imagery are held constant across variants; only design diverges (fair comparison).

@@ -1,8 +1,8 @@
 # Taste Profile
 
-Concrete design moves extracted from winners the user actually picked. Primary learned artifact — read in Stage 0, append after every Stage 5. Future Design Reads start from here.
+Concrete design moves extracted from winners the user actually picked. The **derived** narrative — read in Stage 0 for the Design Read. Raw pick data lives in `taste-signals.jsonl` (append-only, one row/run); this file is rewritten from it by the Stage 5 distill (~every 10 rows), NOT appended per-run. Future Design Reads start from here.
 
-Empty until the first bake-off. Each entry: date · page kind · what was picked (font / palette / layout / motion / density) · one-line why it won.
+Each entry: date · page kind · what was picked (font / palette / layout / motion / density) · one-line why it won. Rows below predate the signals log (historical, hand-written); new runs flow through `taste-signals.jsonl` → distill.
 
 | Date | Page kind | Type | Palette | Layout | Motion | Density | Why it won |
 |---|---|---|---|---|---|---|---|

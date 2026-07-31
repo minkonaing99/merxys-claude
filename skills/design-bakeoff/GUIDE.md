@@ -6,7 +6,7 @@ How to drive the website-design pipeline. Read `SKILL.md` for the engine interna
 
 ## 1. What it is (in one breath)
 
-One command that runs a full design studio: it reads your brief, grounds in real design tokens, generates 2-3 deliberately different variants, gates them on accessibility + responsive correctness, has two AI judges critique them, then **you** pick the winner. Only the winner gets motion, gets ported to your framework, and gets an SEO pass. Every pick teaches a taste profile so the next run starts smarter.
+One command that runs a full design studio: it reads your brief, grounds in real design tokens, generates deliberately different variants (5 on a full Site, 2 on a single Page), gates them on accessibility + responsive correctness, has two AI judges critique them, opens the survivors in a live browser gallery, then **you** pick the winner. Only the winner gets motion, gets ported to your framework, and gets an SEO pass. Every pick teaches a taste profile so the next run starts smarter.
 
 You never invoke `taste-skill`, `impeccable`, `gsap-*`, `emil-design-eng` etc. by hand. `design-bakeoff` chains them. Invoking them piecemeal skips the grounding, the divergence, the gates, and the learning loop.
 
@@ -74,10 +74,10 @@ scroll reveals. Scope: full page. Ship to: Next.
 |---|---|---|
 | **0 · Design Read** | One line: "Reading this as: [kind] for [audience], [vibe], leaning [aesthetic]." + dial values. | Correct it if the read is wrong. This is your cheapest steering point. |
 | **1 · Effort tier** | It picks Tweak / Page / Site. May ask ONE question. | Answer if asked; else it proceeds. |
-| **2 · Generate** | 2-3 static HTML variants, each a different direction lane, sharing one copy deck + image set. | Wait. |
-| **3 · Gate + judge** | Broken variants (a11y/responsive fail) are dropped. Survivors shown at mobile + desktop with judge notes. | **You pick the winner.** The pipeline never auto-picks on taste. |
+| **2 · Generate** | Static HTML variants (5 on a Site, 2 on a Page), each a different direction lane, sharing one copy deck + image set. | Wait. |
+| **3 · Gate + judge** | Broken variants (a11y/responsive fail) are dropped. Survivors open in a live `gallery.html` (iframes, mobile/desktop toggle, judge notes). | **You pick the winner by number, click the 6 chips + optional note, and reject the runner-up.** The pipeline never auto-picks on taste. |
 | **4 · Motion** | Winner gets gsap animation matched to the MOTION dial. Shown for confirm. | Approve or adjust. |
-| **5 · Port + learn** | Winner ported to your framework, best-practices + SEO pass, `DESIGN.md` written to project root, taste profile updated. | Review the port. |
+| **5 · Port + learn** | Winner ported to your framework, best-practices + SEO pass, `DESIGN.md` written to project root, one row appended to `taste-signals.jsonl` (distilled into the taste profile every ~10 runs). | Review the port. |
 | **6 · Ship** | Only if you say "go live". | Explicit approval required. |
 
 ---
@@ -88,7 +88,7 @@ scroll reveals. Scope: full page. Ship to: Next.
 |---|---|---|---|
 | **Tweak** | one component / color / copy | no bake-off, single pass, `impeccable audit` only | seconds, ~3 skills |
 | **Page** | one full page or section | 2-variant bake-off + gates + judges | minutes, ~6-8 skills |
-| **Site** | multi-page / new brand / redesign | full 3-variant bake-off + grounding + winner port | longer, ~10-14 skills |
+| **Site** | multi-page / new brand / redesign | full 5-variant bake-off + grounding + browser gallery + winner port | longer, ~10-14 skills |
 
 The **firing matrix** in `SKILL.md` controls exactly which skills fire per tier — the pipeline won't fire all 20 engines on a tweak.
 
@@ -108,9 +108,13 @@ You steer by **how you phrase the brief and the Design Read correction**, never 
 
 ## 7. The learning loop (why runs get better)
 
-Every winner and every loser is logged to `taste-profile.md` with the reason it won/lost. Over ~10 jobs the pipeline distills your stable preferences (always true) from context-dependent ones (true for landing, not dashboard). Cost bends **down** as the profile matures (less grounding needed); quality bends **up** (starts from your proven moves). The rejections matter as much as the picks — anti-preferences converge taste 2-3× faster.
+When you pick a winner in the gallery, you also click a few **chips** — 6 fixed +/- axes (warmer/cooler, denser/airier, more/less expressive type, more/less motion, more asymmetric/grid, more/less ornament) — plus an optional note, and one **reject chip** on the runner-up. That's the whole ask. Everything else is automatic.
 
-You don't manage this. Just keep picking winners honestly.
+Under the hood each run appends one row to `taste-signals.jsonl` (your chips, the winning tokens, the runner-up reject, auto-computed diffs vs the other losers). Every ~10 rows the pipeline **distills** that raw log into `taste-profile.md` — your stable preferences (always true) vs context-dependent ones (landing, not dashboard). Once you have **≥5 runs for a register** (brand-landing vs product/app), it starts **auto-setting the opening dials** from your leanings — you still override with words, and all 5 lanes still generate, so nothing ossifies.
+
+Cost bends **down** as the log matures (less grounding, smarter start); quality bends **up** (starts from your proven moves). Rejections matter as much as picks — anti-preferences converge taste 2-3× faster.
+
+You don't manage this. Just keep picking winners honestly and clicking the chips.
 
 ---
 
@@ -131,5 +135,5 @@ All motion always ships with `gsap.matchMedia()` + `prefers-reduced-motion` fall
 - **Invoking sub-skills directly** ("use taste-skill on this"). You lose grounding, divergence, gates, and learning. Use `design-bakeoff`.
 - **Vague brief.** "make it pop" gives the pipeline nothing. Name a vibe or a reference.
 - **Skipping the Design Read correction.** It's the cheapest moment to redirect. Read it, correct it.
-- **Expecting an auto-winner.** By design, the pipeline narrows to 2-3 and *you* choose. That's the point — taste is yours.
+- **Expecting an auto-winner.** By design, the pipeline narrows to the survivors, opens them in a browser gallery, and *you* choose by number. That's the point — taste is yours.
 - **Asking for "go live" implicitly.** Deploy needs explicit approval; it's outward-facing.
