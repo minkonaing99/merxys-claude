@@ -31,6 +31,11 @@ telemetry/
 ide/
 file-history/
 
+# Daemon runtime state (contains control.key - never commit)
+daemon/
+daemon.log
+jobs/
+
 # Project-specific data (machine-local paths)
 projects/
 
