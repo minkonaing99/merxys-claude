@@ -1,0 +1,26 @@
+{
+  "skill_name": "md-to-epub",
+  "evals": [
+    {
+      "id": 0,
+      "name": "flat-heading-book-full-pipeline",
+      "prompt": "I've got clear-thinking.md in this folder - it's a book I converted out of a PDF and it came out pretty mangled. Every heading is at the same level, there's a copyright page and a bunch of publisher junk in there, and the contents page is just one giant run-on paragraph. Can you turn it into an epub I can actually read? Would love a short recap at the end of each chapter too.",
+      "expected_output": "A valid EPUB with 8 chapters (Introduction, 6 numbered chapters, Epilogue), no copyright/publisher/back matter, split title merged, promoted subtitle folded in, recap on every chapter, working TOC.",
+      "files": ["fixtures/clear-thinking.md"]
+    },
+    {
+      "id": 1,
+      "name": "cleanup-only-no-summaries",
+      "prompt": "convert clear-thinking.md to epub. strip the images and all the copyright/legal pages, fix the toc. don't add any summaries or commentary, i just want the book text cleaned up",
+      "expected_output": "A valid EPUB with correct chapter structure and no recap blocks anywhere. Skill must honor the opt-out rather than running the summary phase anyway.",
+      "files": ["fixtures/clear-thinking.md"]
+    },
+    {
+      "id": 2,
+      "name": "ocr-damage-audit-trail",
+      "prompt": "this markdown book (clear-thinking.md) is full of scanner garbage - there's weird characters mid-word and words that got misread. build me an epub out of it and clean up the text, but i want to be able to see exactly what you changed since it's someone else's writing",
+      "expected_output": "A valid EPUB plus repairs.jsonl logging each edit with before/after. Real damage fixed (exotic glyph in title, 'Tn' for 'In'), correct prose left untouched.",
+      "files": ["fixtures/clear-thinking.md"]
+    }
+  ]
+}
